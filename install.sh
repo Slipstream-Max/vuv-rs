@@ -4,31 +4,46 @@
 cargo build --release || exit 1
 
 # Default directories
-DEFAULT_VUV_DIR="$HOME/.vuv"
-DEFAULT_VUV_BIN="$HOME/.local/bin"
-DEFAULT_VENV_DIR="$HOME/.venvs"
+DEFAULT_ROOT="$HOME/vuv"
+DEFAULT_VUV_DIR="$DEFAULT_ROOT/bin"
+DEFAULT_VUV_CONFIG="$DEFAULT_ROOT/config"
+DEFAULT_VENV_DIR="$DEFAULT_ROOT/venvs"
 
 # Allow customization through environment variables
+VUV_ROOT="${VUV_ROOT_DIR:-$DEFAULT_ROOT}"
 VUV_DIR="${VUV_CONFIG_DIR:-$DEFAULT_VUV_DIR}"
-VUV_BIN="${VUV_BIN_DIR:-$DEFAULT_VUV_BIN}"
+VUV_CONFIG="${VUV_CONFIG:-$DEFAULT_VUV_CONFIG}"
 VENV_DIR="${VUV_VENV_DIR:-$DEFAULT_VENV_DIR}"
 
-# Create directories if they don't exist
-mkdir -p "$VUV_DIR"
-mkdir -p "$VUV_BIN"
-mkdir -p "$VENV_DIR"
-
-# Copy the binary
-cp target/release/vuv-rs "$VUV_BIN/vuv-bin"
-
-# Make it executable
-chmod +x "$VUV_BIN/vuv-bin"
+echo "Configuration:"
+echo "  VUV_ROOT_DIR   = $VUV_ROOT"
+echo "  VUV_DIR        = $VUV_DIR"
+echo "  VUV_CONFIG     = $VUV_CONFIG"
+echo "  VUV_VENV_DIR   = $VENV_DIR"
+echo
+echo "To customize these locations, set these environment variables before installation:"
+echo "  VUV_ROOT_DIR   - Root directory for all vuv related files"
+echo "  VUV_DIR        - Directory for executable files"
+echo "  VUV_CONFIG     - Directory for configuration files"
+echo "  VUV_VENV_DIR   - Directory for virtual environments"
 
 # Setup shell integration
 echo "Please select your shell:"
 echo "1) bash"
 echo "2) zsh"
 read -p "Enter the number corresponding to your shell: " shell_choice
+
+
+# Create directories if they don't exist
+mkdir -p "$VUV_DIR"
+mkdir -p "$VUV_CONFIG"
+mkdir -p "$VENV_DIR"
+
+# Copy the binary
+cp target/release/vuv-rs "$VUV_DIR/vuv-bin"
+
+# Make it executable
+chmod +x "$VUV_DIR/vuv-bin"
 
 SHELL_RC=""
 case $shell_choice in
@@ -47,9 +62,10 @@ esac
 # Create the shell function wrapper
 cat << EOF > "$VUV_DIR/vuv.sh"
 # vuv configuration
-export VUV_CONFIG_DIR="$VUV_DIR"
+export VUV_ROOT_DIR="$VUV_ROOT"
+export VUV_CONFIG_DIR="$VUV_CONFIG"
+export VUV_CONFIG="$VUV_CONFIG"
 export VUV_VENV_DIR="$VENV_DIR"
-export VUV_BIN_DIR="$VUV_BIN"
 
 function vuv() {
     case "\$1" in
@@ -102,8 +118,8 @@ complete -F _vuv_complete vuv
 EOF
 
 # Add to PATH if not already there
-if ! grep -q "$VUV_BIN" "$SHELL_RC"; then
-    echo "export PATH=\"\$PATH:$VUV_BIN\"" >> "$SHELL_RC"
+if ! grep -q "$VUV_DIR" "$SHELL_RC"; then
+    echo "export PATH=\"\$PATH:$VUV_DIR\"" >> "$SHELL_RC"
 fi
 
 # Source the shell function
@@ -112,15 +128,7 @@ if ! grep -q "source \"$VUV_DIR/vuv.sh\"" "$SHELL_RC"; then
 fi
 
 echo "Installation complete!"
-echo "Configuration:"
-echo "  VUV_CONFIG_DIR = $VUV_DIR"
-echo "  VUV_VENV_DIR  = $VENV_DIR"
-echo "  VUV_BIN_DIR   = $VUV_BIN"
-echo
-echo "To customize these locations, set these environment variables before installation:"
-echo "  VUV_CONFIG_DIR - Directory for vuv configuration"
-echo "  VUV_VENV_DIR  - Directory for virtual environments"
-echo "  VUV_BIN_DIR   - Directory for vuv binary"
+
 echo
 echo "Please restart your shell or run:"
 echo "source $SHELL_RC" 
