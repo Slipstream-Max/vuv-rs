@@ -17,7 +17,7 @@ DEFAULT_VENV_DIR="$DEFAULT_ROOT/venvs"
 
 # Get actual directories from environment variables if set
 VUV_ROOT="${VUV_ROOT_DIR:-$DEFAULT_ROOT}"
-VUV_DIR="${VUV_CONFIG_DIR:-$DEFAULT_VUV_DIR}"
+VUV_DIR="${VUV_DIR:-$DEFAULT_VUV_DIR}"
 VUV_CONFIG="${VUV_CONFIG:-$DEFAULT_VUV_CONFIG}"
 VENV_DIR="${VUV_VENV_DIR:-$DEFAULT_VENV_DIR}"
 
@@ -51,7 +51,8 @@ done
 
 # Remove program files and configurations
 echo "Removing program files and configurations..."
-rm -rf "$VUV_DIR" "$VUV_CONFIG"
+rm -rf "$VUV_DIR"
+rm -rf "$VUV_CONFIG"
 
 # Remove virtual environments if user didn't choose to keep them
 if [ "$keep_venvs" != "y" ] && [ "$keep_venvs" != "Y" ]; then
