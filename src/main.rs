@@ -148,6 +148,16 @@ fn remove_venv(config: &VuvConfig, name: &str) -> Result<()> {
         anyhow::bail!("Virtual environment {} does not exist", name);
     }
 
+    // Check if this environment is currently activated
+    if let Ok(current_venv) = env::var("VIRTUAL_ENV") {
+        let current_venv = PathBuf::from(current_venv);
+        if current_venv == venv_path {
+            println!("Warning: This environment is currently activated.");
+            println!("Please run 'vuv deactivate' first and then try removing the environment.");
+            anyhow::bail!("Cannot remove an active virtual environment");
+        }
+    }
+
     std::fs::remove_dir_all(&venv_path)?;
     println!("Removed virtual environment: {}", name);
     Ok(())
