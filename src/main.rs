@@ -194,7 +194,7 @@ fn run_pip_command(packages: &[String], install: bool) -> Result<()> {
     if install {
         cmd.arg("install");
     } else {
-        cmd.args(["uninstall", "-y"]);
+        cmd.arg("uninstall");
     }
     
     cmd.args(packages);
